@@ -30,6 +30,7 @@ def merge_projects(json_projects: List[dict], discovered: List[dict]) -> List[di
     # 构建结果：先加入所有 JSON 项目
     result = list(json_projects)
     result_ids = {p.get("id") for p in json_projects}
+    result_ports = {get_port_from_url(p.get("url", "")) for p in json_projects}
 
     # 用端口号做 key，构建 discovered 字典
     discovered_by_port = {}
@@ -48,11 +49,12 @@ def merge_projects(json_projects: List[dict], discovered: List[dict]) -> List[di
             if not p.get("icon"):
                 p["icon"] = d.get("icon", "⚙️")
 
-    # discovered 中有但 JSON 中没有的服务，也加入结果
+    # discovered 中有但 JSON 中没有的服务（按端口去重），也加入结果
     for d in discovered:
         d_port = get_port_from_url(d.get("url", ""))
-        if d_port and not any(get_port_from_url(p.get("url", "")) == d_port for p in json_projects):
+        if d_port and d_port not in result_ports:
             result.append(d)
+            result_ports.add(d_port)
 
     return result
 
