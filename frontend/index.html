@@ -323,11 +323,11 @@
 
     /* Tables */
     .table-container { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
-    table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--text-muted); background: var(--bg-subtle); border-bottom: 1px solid var(--border); }
-    td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid var(--border-soft); }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: var(--bg-subtle); }
+    .table-container table { width: 100%; border-collapse: collapse; }
+    .table-container th { text-align: left; padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--text-muted); background: var(--bg-subtle); border-bottom: 1px solid var(--border); }
+    .table-container td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid var(--border-soft); }
+    .table-container td:last-child { border-bottom: none; }
+    .table-container tr:hover td { background: var(--bg-subtle); }
 
     /* Badge */
     .badge { display: inline-block; padding: 2px 8px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 500; }
