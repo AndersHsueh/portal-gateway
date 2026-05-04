@@ -468,6 +468,8 @@
     if (savedUser) {
       state.user = savedUser;
       state.page = 'dashboard';
+      // Fetch projects for returning logged-in user
+      getProjects().then(p => { state.projects = p; render(); });
     }
 
     const icons = {
