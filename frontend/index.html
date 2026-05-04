@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>老薛的技术博客 - Anders' TechBlog</title>
+  <style>
+    :root {
+      --bg: #faf9f7;
+      --bg-app: #faf9f7;
+      --bg-panel: #ffffff;
+      --bg-subtle: #f4f2ed;
+      --bg-muted: #ece9e2;
+      --bg-elevated: #ffffff;
+      --border: #ebe8e1;
+      --border-strong: #d8d4cb;
+      --border-soft: #f1eee7;
+      --text: #1a1916;
+      --text-strong: #0d0c0a;
+      --text-muted: #74716b;
+      --text-soft: #989590;
+      --text-faint: #b3b0a8;
+      --accent: #c96442;
+      --accent-strong: #b45a3b;
+      --accent-soft: #f5d8cb;
+      --accent-tint: #fbeee5;
+      --accent-hover: #b45a3b;
+      --green: #1f7a3a;
+      --green-bg: #e8f7ee;
+      --green-border: #c6ead2;
+      --blue: #2348b8;
+      --blue-bg: #e8efff;
+      --blue-border: #c8d6ff;
+      --purple: #6c3aa6;
+      --purple-bg: #f3ecf9;
+      --purple-border: #e4d4f1;
+      --red: #9c2a25;
+      --red-bg: #fdecea;
+      --red-border: #f5c6c2;
+      --amber: #b26200;
+      --amber-bg: #fff3e0;
+      --radius-sm: 6px;
+      --radius: 10px;
+      --radius-lg: 14px;
+      --radius-pill: 999px;
+      --shadow-xs: 0 1px 0 rgba(28, 27, 26, 0.04);
+      --shadow-sm: 0 1px 2px rgba(28, 27, 26, 0.05), 0 1px 3px rgba(28, 27, 26, 0.04);
+      --shadow-md: 0 6px 24px rgba(28, 27, 26, 0.07), 0 2px 6px rgba(28, 27, 26, 0.04);
+      --shadow-lg: 0 24px 60px rgba(28, 27, 26, 0.16), 0 8px 16px rgba(28, 27, 26, 0.07);
+      --sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    [data-theme="dark"] {
+      --bg: #1a1917;
+      --bg-app: #1a1917;
+      --bg-panel: #222120;
+      --bg-subtle: #272523;
+      --bg-muted: #2e2c29;
+      --bg-elevated: #2a2825;
+      --border: #333128;
+      --border-strong: #46433c;
+      --border-soft: #2a2825;
+      --text: #e8e4dc;
+      --text-strong: #f2ede4;
+      --text-muted: #9a9690;
+      --text-soft: #6e6b65;
+      --text-faint: #4e4b46;
+      --accent: #d97a56;
+      --accent-strong: #e8896a;
+      --accent-soft: #3d2318;
+      --accent-tint: #2e1a12;
+      --accent-hover: #e8896a;
+      --green: #4caf72;
+      --green-bg: #0f2a18;
+      --green-border: #1a4028;
+      --blue: #6b8fe8;
+      --blue-bg: #0f1a38;
+      --blue-border: #1a2c58;
+      --purple: #a87dd4;
+      --purple-bg: #1e1030;
+      --purple-border: #321a50;
+      --red: #e06b65;
+      --red-bg: #2a0e0c;
+      --red-border: #451714;
+      --amber: #e09a40;
+      --amber-bg: #2a1a04;
+      --shadow-xs: 0 1px 0 rgba(0, 0, 0, 0.2);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.6), 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+    @media (prefers-color-scheme: dark) {
+      html:not([data-theme]) {
+        --bg: #1a1917;
+        --bg-app: #1a1917;
+        --bg-panel: #222120;
+        --bg-subtle: #272523;
+        --bg-muted: #2e2c29;
+        --bg-elevated: #2a2825;
+        --border: #333128;
+        --border-strong: #46433c;
+        --border-soft: #2a2825;
+        --text: #e8e4dc;
+        --text-strong: #f2ede4;
+        --text-muted: #9a9690;
+        --text-soft: #6e6b65;
+        --text-faint: #4e4b46;
+        --accent: #d97a56;
+        --accent-strong: #e8896a;
+        --accent-soft: #3d2318;
+        --accent-tint: #2e1a12;
+        --accent-hover: #e8896a;
+        --green: #4caf72;
+        --green-bg: #0f2a18;
+        --green-border: #1a4028;
+        --blue: #6b8fe8;
+        --blue-bg: #0f1a38;
+        --blue-border: #1a2c58;
+        --red: #e06b65;
+        --red-bg: #2a0e0c;
+        --red-border: #451714;
+        --amber: #e09a40;
+        --amber-bg: #2a1a04;
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--sans);
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+    }
+
+    /* Login Page */
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: radial-gradient(circle at top left, rgba(201, 100, 66, 0.08), transparent 34%),
+                  radial-gradient(circle at bottom right, rgba(201, 100, 66, 0.06), transparent 32%),
+                  linear-gradient(135deg, #faf9f7 0%, #f5f0e8 45%, #faf9f7 100%);
+    }
+    .login-shell {
+      width: min(1000px, 100%);
+      min-height: 600px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      border-radius: 28px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 30px 80px rgba(201, 100, 66, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+    .brand-panel {
+      position: relative;
+      overflow: hidden;
+      padding: 36px 42px 28px;
+      background: linear-gradient(145deg, #f8f6f1 0%, #f0ebe3 52%, #e8e2d8 100%);
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-strong);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 12px rgba(201, 100, 66, 0.3);
+    }
+    .brand-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .character-stage {
+      position: relative;
+      margin-top: auto;
+      height: 380px;
+      user-select: none;
+    }
+    .character {
+      position: absolute;
+      bottom: 0;
+      transform-origin: bottom center;
+      transition: transform 0.65s ease, height 0.65s ease;
+    }
+    .character-purple { left: 68px; width: 160px; height: 360px; background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 14px 14px 0 0; z-index: 1; }
+    .character-black { left: 228px; width: 110px; height: 280px; background: linear-gradient(180deg, #374151 0%, #1f2937 100%); border-radius: 10px 10px 0 0; z-index: 2; }
+    .character-orange { left: 0px; bottom: 0; width: 220px; height: 180px; background: linear-gradient(180deg, #fb923c 0%, #f97316 100%); border-radius: 110px 110px 0 0; z-index: 3; }
+    .character-yellow { left: 300px; bottom: 0; width: 130px; height: 200px; background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%); border-radius: 65px 65px 0 0; z-index: 4; }
+    .eyes { position: absolute; display: flex; gap: 20px; transition: left 0.14s linear, top 0.14s linear; }
+    .character-purple .eyes { gap: 6px; }
+    .character-black .eyes { gap: 4px; }
+    .pupils-only .eyes { gap: 16px; }
+    .eye { width: 16px; height: 16px; border-radius: 50%; overflow: hidden; }
+    .eyeball { background: #fff; display: flex; align-items: center; justify-content: center; transition: height 0.12s ease; height: 16px; }
+    .eyeball.blinking { height: 2px; margin-top: 7px; }
+    .eye-pupil, .dot-pupil { width: 7px; height: 7px; border-radius: 50%; background: #1f2937; transition: transform 0.08s linear; }
+    .dot-pupil { width: 10px; height: 10px; }
+    .yellow-mouth { position: absolute; width: 48px; height: 3px; border-radius: 999px; background: #1f2937; transition: left 0.12s linear, top 0.12s linear; }
+    .stage-glow { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.4; }
+    .stage-glow-a { right: 30px; top: 20px; width: 160px; height: 160px; background: rgba(255, 255, 255, 0.6); }
+    .stage-glow-b { left: 10px; bottom: 30px; width: 200px; height: 200px; background: rgba(201, 100, 66, 0.15); }
+    .form-panel { display: flex; align-items: center; justify-content: center; padding: 42px 34px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), #faf8f5 100%); }
+    .form-wrap { width: 100%; max-width: 360px; }
+    .form-header h2 { margin: 0; font-size: 28px; color: var(--text-strong); letter-spacing: -0.02em; }
+    .form-header p { margin-top: 6px; color: var(--text-muted); font-size: 13px; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 6px 12px; font-size: 13px; font-weight: 500; font-family: inherit;
+      border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-panel);
+      color: var(--text); cursor: pointer;
+      transition: background 120ms ease, border-color 120ms ease, color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--bg-subtle); }
+    .btn:active { transform: scale(0.96); }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .btn.primary { background: var(--accent); color: white; border-color: var(--accent); box-shadow: inset 0 1px 0 rgba(180, 90, 59, 0.18); }
+    .btn.primary:hover { background: var(--accent-hover); }
+    .btn.danger { background: var(--red-bg); border-color: var(--red-border); color: var(--red); }
+    .btn.danger:hover { background: var(--red); color: white; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Form Elements */
+    .login-form { margin-top: 28px; }
+    .input-group { margin-bottom: 18px; }
+    .input-wrapper { position: relative; }
+    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-faint); width: 18px; height: 18px; pointer-events: none; }
+    .input {
+      width: 100%; font: inherit; font-size: 14px; padding: 12px 14px 12px 44px;
+      background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--text); transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+    .input::placeholder { color: var(--text-faint); }
+    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); outline: none; }
+    .password-toggle {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--text-faint); cursor: pointer; padding: 4px; border-radius: 4px;
+      transition: color 120ms ease; background: none; border: none;
+    }
+    .password-toggle:hover { color: var(--text-muted); }
+    .submit-btn {
+      width: 100%; height: 48px; border: none; border-radius: var(--radius);
+      font-size: 15px; font-weight: 600; letter-spacing: 0.01em;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+      color: white; cursor: pointer; box-shadow: 0 8px 24px rgba(201, 100, 66, 0.25);
+      transition: transform 120ms ease, box-shadow 120ms ease; margin-top: 8px;
+    }
+    .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 32px rgba(201, 100, 66, 0.3); }
+    .submit-btn:active { transform: scale(0.98); }
+    .register-row { margin-top: 20px; text-align: center; font-size: 13px; color: var(--text-muted); }
+    .register-row a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .register-row a:hover { text-decoration: underline; }
+    .login-footer { position: fixed; left: 0; right: 0; bottom: 16px; text-align: center; color: var(--text-faint); font-size: 11px; letter-spacing: 0.02em; }
+
+    /* Toast */
+    .toast-container { position: fixed; top: 24px; right: 24px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+    .toast { padding: 12px 16px; border-radius: var(--radius); font-size: 13px; box-shadow: var(--shadow-md); animation: pop-in 180ms ease-out; }
+    .toast.success { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+    .toast.error { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+    @keyframes pop-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Dashboard */
+    .page { min-height: 100vh; display: flex; flex-direction: column; }
+    .header { background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 0 24px; height: 48px; display: flex; align-items: center; justify-content: space-between; }
+    .header-brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
+    .header-brand svg { color: var(--accent); }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .page-content { flex: 1; padding: 32px 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
+    .dashboard-header { margin-bottom: 24px; }
+    .dashboard-greeting { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .dashboard-subtitle { color: var(--text-muted); font-size: 13px; }
+
+    /* Service Cards Grid - wider cards for description */
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .service-card {
+      display: flex; flex-direction: column; gap: 8px; padding: 20px;
+      cursor: pointer; background: var(--bg-panel); border: 1px solid var(--border);
+      border-radius: var(--radius); transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+    .service-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+    .service-icon { font-size: 32px; }
+    .service-name { font-weight: 500; font-size: 14px; color: var(--text-strong); }
+    .service-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+    /* Avatar & Dropdown */
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; }
+    .dropdown { position: relative; }
+    .dropdown-menu {
+      position: absolute; top: calc(100% + 4px); right: 0; min-width: 180px;
+      background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: var(--shadow-lg); z-index: 100; animation: pop-in 180ms cubic-bezier(0.21, 1.02, 0.73, 1); overflow: hidden;
+    }
+    .dropdown-item { padding: 8px 14px; font-size: 13px; cursor: pointer; transition: background 120ms ease; }
+    .dropdown-item:hover { background: var(--bg-subtle); }
+    .dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
+    .admin-section { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; }
+    .admin-title { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .admin-actions { display: flex; gap: 8px; }
+    .hidden { display: none !important; }
+
+    @media (max-width: 900px) {
+      .login-page { padding: 0; }
+      .login-shell { min-height: 100vh; border-radius: 0; grid-template-columns: 1fr; }
+      .brand-panel { display: none; }
+      .form-panel { min-height: 100vh; padding: 32px 20px 72px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    // ============================================
+    // API Functions
+    // ============================================
+    const API_BASE = '/api';
+
+    async function login(email, password) {
+      const formData = new URLSearchParams();
+      formData.append('email', email);
+      formData.append('password', password);
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || '登录失败');
+      }
+      const data = await res.json();
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      return data;
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.reload();
+    }
+
+    function getCurrentUser() {
+      const u = localStorage.getItem('user');
+      return u ? JSON.parse(u) : null;
+    }
+
+    function isAdmin() {
+      const u = getCurrentUser();
+      return u && u.role === 'admin';
+    }
+
+    async function fetchWithAuth(url, opts = {}) {
+      const token = localStorage.getItem('token');
+      const headers = { ...opts.headers };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(url, { ...opts, headers });
+      if (res.status === 401) { logout(); throw new Error('未登录'); }
+      return res;
+    }
+
+    async function getProjects() {
+      const res = await fetchWithAuth(`${API_BASE}/projects`);
+      const data = await res.json();
+      return data.projects || [];
+    }
+
+    async function getUsers() {
+      const res = await fetchWithAuth(`${API_BASE}/admin/users`);
+      return res.json();
+    }
+
+    async function createUser(email, password, name, role) {
+      const res = await fetchWithAuth(`${API_BASE}/admin/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name, role })
+      });
+      return res.json();
+    }
+
+    async function updateUser(id, data) {
+      const res = await fetchWithAuth(`${API_BASE}/admin/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return res.json();
+    }
+
+    async function deleteUser(id) {
+      const res = await fetchWithAuth(`${API_BASE}/admin/users/${id}`, { method: 'DELETE' });
+      return res.json();
+    }
+
+    async function resetPassword(id, newPassword) {
+      const res = await fetchWithAuth(`${API_BASE}/admin/users/${id}/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_password: newPassword })
+      });
+      return res.json();
+    }
+
+    async function getLogs() {
+      const res = await fetchWithAuth(`${API_BASE}/admin/logs`);
+      return res.json();
+    }
+
+    // ============================================
+    // State
+    // ============================================
+    const state = {
+      page: 'login',
+      user: null,
+      projects: [],
+      users: [],
+      logs: [],
+      dropdownOpen: false,
+      anim: { mouseX: 275, mouseY: 150, targetMouseX: 275, targetMouseY: 150, isTyping: false, activeField: '', showPassword: false, lookingAtEachOther: false },
+      toasts: [],
+      loading: false
+    };
+
+    // Check if already logged in
+    const savedUser = getCurrentUser();
+    if (savedUser) {
+      state.user = savedUser;
+      state.page = 'dashboard';
+    }
+
+    const icons = {
+      rocket: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>`,
+      users: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+      fileText: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>`,
+      arrowLeft: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>`,
+      edit: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>`,
+      trash: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`,
+      refresh: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>`,
+      plus: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`,
+      x: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
+      search: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
+    };
+
+    // ============================================
+    // Render
+    // ============================================
+    function render() {
+      const app = document.getElementById('app');
+      switch (state.page) {
+        case 'login': app.innerHTML = renderLoginPage(); initAnim(); break;
+        case 'dashboard': app.innerHTML = renderDashboard(); break;
+        case 'users': app.innerHTML = renderUsersPage(); break;
+        case 'logs': app.innerHTML = renderLogsPage(); break;
+      }
+      renderToasts();
+    }
+
+    function renderLoginPage() {
+      return `
+        <div class="login-page">
+          <div class="login-shell">
+            <section class="brand-panel">
+              <div class="brand-title">
+                <div class="brand-badge">${icons.rocket}</div>
+                老薛的技术博客
+              </div>
+              <div class="brand-subtitle">Anders' TechBlog</div>
+              <div class="character-stage" id="stage">
+                <div class="character character-purple" id="purpleChar">
+                  <div class="eyes" id="purpleEyes" style="left: 40px; top: 38px;">
+                    <div class="eye"><div class="eyeball" id="pb1"><div class="eye-pupil" id="pp1"></div></div></div>
+                    <div class="eye"><div class="eyeball" id="pb2"><div class="eye-pupil" id="pp2"></div></div></div>
+                  </div>
+                </div>
+                <div class="character character-black" id="blackChar">
+                  <div class="eyes" id="blackEyes" style="left: 22px; top: 28px;">
+                    <div class="eye"><div class="eyeball" id="bb1"><div class="eye-pupil" id="bp1"></div></div></div>
+                    <div class="eye"><div class="eyeball" id="bb2"><div class="eye-pupil" id="bp2"></div></div></div>
+                  </div>
+                </div>
+                <div class="character character-orange">
+                  <div class="eyes pupils-only" id="orangeEyes" style="left: 72px; top: 78px;">
+                    <div class="dot-pupil" id="op1"></div>
+                    <div class="dot-pupil" id="op2"></div>
+                  </div>
+                </div>
+                <div class="character character-yellow">
+                  <div class="eyes pupils-only" id="yellowEyes" style="left: 46px; top: 38px;">
+                    <div class="dot-pupil" id="yp1"></div>
+                    <div class="dot-pupil" id="yp2"></div>
+                  </div>
+                  <div class="yellow-mouth" id="ym" style="left: 36px; top: 78px;"></div>
+                </div>
+                <div class="stage-glow stage-glow-a"></div>
+                <div class="stage-glow stage-glow-b"></div>
+              </div>
+            </section>
+            <section class="form-panel">
+              <div class="form-wrap">
+                <div class="form-header">
+                  <h2>登录系统</h2>
+                  <p>使用邮箱和密码登录</p>
+                </div>
+                <form class="login-form" onsubmit="handleLogin(event)">
+                  <div class="input-group">
+                    <div class="input-wrapper">
+                      <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                      <input type="email" class="input" id="emailInput" placeholder="邮箱地址" required onfocus="startTyping('username')" onblur="stopTyping('username')">
+                    </div>
+                  </div>
+                  <div class="input-group">
+                    <div class="input-wrapper">
+                      <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      <input type="password" class="input" id="passwordInput" placeholder="密码" required onfocus="startTyping('password')" onblur="stopTyping('password')">
+                      <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <button type="submit" class="submit-btn" id="submitBtn">登录</button>
+                  <div class="register-row">还没有账号？ <a href="#" onclick="showToast('请联系管理员创建账号', 'error'); return false;">联系管理员</a></div>
+                </form>
+              </div>
+            </section>
+          </div>
+          <div class="login-footer">老薛的技术博客 · Anders' TechBlog · © 2026</div>
+        </div>
+      `;
+    }
+
+    function renderDashboard() {
+      const greeting = isAdmin() ? '欢迎回来，管理员' : '欢迎回来';
+      return `
+        <div class="page">
+          <header class="header">
+            <div class="header-brand">${icons.rocket}<span>老薛的技术博客</span></div>
+            <div class="header-actions">
+              ${isAdmin() ? `<button class="btn" onclick="navigate('users')">${icons.users}<span>用户管理</span></button>
+                <button class="btn" onclick="navigate('logs')">${icons.fileText}<span>登录日志</span></button>` : ''}
+              <div class="dropdown">
+                <button class="btn" onclick="toggleDropdown()">
+                  <div class="avatar">${state.user?.name?.charAt(0) || 'U'}</div>
+                  <span>${state.user?.name || 'User'}</span>
+                  <span style="color: var(--text-faint)">▼</span>
+                </button>
+                <div class="dropdown-menu ${state.dropdownOpen ? '' : 'hidden'}">
+                  <div class="dropdown-item" style="pointer-events:none;opacity:0.7">${state.user?.email || ''}</div>
+                  <div class="dropdown-divider"></div>
+                  <div class="dropdown-item" onclick="handleLogout()">退出登录</div>
+                </div>
+              </div>
+            </div>
+          </header>
+          <div class="page-content">
+            ${isAdmin() ? `<div class="admin-section"><div class="admin-title">Admin 操作</div><div class="admin-actions"><button class="btn" onclick="navigate('users')">${icons.users} 用户管理</button><button class="btn" onclick="navigate('logs')">${icons.fileText} 登录日志</button></div></div>` : ''}
+            <div class="dashboard-header">
+              <h1 class="dashboard-greeting">${greeting}，${state.user?.name || ''}</h1>
+              <p class="dashboard-subtitle">以下是可用的服务，点击即可访问</p>
+            </div>
+            <div class="services-grid" id="projectsGrid">
+              ${state.projects.map(p => `
+                <div class="service-card" onclick="window.open('${p.url}', '_blank')">
+                  <div class="service-icon">${p.icon || '📁'}</div>
+                  <div class="service-name">${p.name}</div>
+                  <div class="service-desc">${p.description || ''}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderUsersPage() {
+      return `
+        <div class="page">
+          <header class="header">
+            <div class="header-brand">${icons.rocket}<span>老薛的技术博客</span></div>
+            <div class="header-actions">
+              <div class="dropdown">
+                <button class="btn" onclick="toggleDropdown()">
+                  <div class="avatar">${state.user?.name?.charAt(0) || 'U'}</div>
+                  <span>${state.user?.name || 'User'}</span>
+                  <span style="color: var(--text-faint)">▼</span>
+                </button>
+                <div class="dropdown-menu ${state.dropdownOpen ? '' : 'hidden'}">
+                  <div class="dropdown-item" onclick="navigate('dashboard')">返回仪表盘</div>
+                  <div class="dropdown-divider"></div>
+                  <div class="dropdown-item" onclick="handleLogout()">退出登录</div>
+                </div>
+              </div>
+            </div>
+          </header>
+          <div class="page-content">
+            <a href="#" class="back-link" onclick="navigate('dashboard'); return false;">${icons.arrowLeft} 返回仪表盘</a>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h1 style="font-size:18px;font-weight:600;">👥 用户管理</h1>
+              <button class="btn primary" onclick="showAddUserModal()">${icons.plus} 添加用户</button>
+            </div>
+            <div style="margin-bottom:16px;max-width:400px;">
+              <div style="position:relative">
+                ${icons.search}
+                <input type="text" class="input" style="padding-left:36px;" placeholder="搜索用户..." oninput="filterUsers(this.value)">
+              </div>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead><tr><th>邮箱</th><th>姓名</th><th>角色</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+                <tbody id="usersTableBody">
+                  ${state.users.map(u => `
+                    <tr data-email="${u.email.toLowerCase()}">
+                      <td>${u.email}</td>
+                      <td>${u.name}</td>
+                      <td><span class="badge ${u.role === 'admin' ? 'accent' : 'blue'}" style="--accent: var(--accent); --accent-bg: var(--accent-tint);">${u.role === 'admin' ? 'Admin' : 'User'}</span></td>
+                      <td><span class="badge ${u.is_active ? 'green' : 'red'}" style="--green-bg:var(--green-bg);--green:var(--green);--red-bg:var(--red-bg);--red:var(--red)">${u.is_active ? '启用' : '禁用'}</span></td>
+                      <td style="color:var(--text-muted)">${new Date(u.created_at).toLocaleDateString('zh-CN')}</td>
+                      <td>
+                        <div style="display:flex;gap:6px;">
+                          <button class="btn icon-btn" onclick="editUser(${u.id})" title="编辑">${icons.edit}</button>
+                          <button class="btn icon-btn" onclick="resetUserPassword(${u.id})" title="重置密码">${icons.refresh}</button>
+                          <button class="btn icon-btn danger" onclick="deleteUser(${u.id})" title="删除">${icons.trash}</button>
+                        </div>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLogsPage() {
+      return `
+        <div class="page">
+          <header class="header">
+            <div class="header-brand">${icons.rocket}<span>老薛的技术博客</span></div>
+            <div class="header-actions">
+              <div class="dropdown">
+                <button class="btn" onclick="toggleDropdown()">
+                  <div class="avatar">${state.user?.name?.charAt(0) || 'U'}</div>
+                  <span>${state.user?.name || 'User'}</span>
+                  <span style="color: var(--text-faint)">▼</span>
+                </button>
+                <div class="dropdown-menu ${state.dropdownOpen ? '' : 'hidden'}">
+                  <div class="dropdown-item" onclick="navigate('dashboard')">返回仪表盘</div>
+                  <div class="dropdown-divider"></div>
+                  <div class="dropdown-item" onclick="handleLogout()">退出登录</div>
+                </div>
+              </div>
+            </div>
+          </header>
+          <div class="page-content">
+            <a href="#" class="back-link" onclick="navigate('dashboard'); return false;">${icons.arrowLeft} 返回仪表盘</a>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h1 style="font-size:18px;font-weight:600;">📋 登录日志</h1>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead><tr><th>时间</th><th>邮箱</th><th>IP</th><th>状态</th></tr></thead>
+                <tbody>
+                  ${(state.logs || []).map(log => `
+                    <tr>
+                      <td style="font-family:var(--mono);color:var(--text-muted)">${new Date(log.created_at).toLocaleString('zh-CN')}</td>
+                      <td>${log.email}</td>
+                      <td style="font-family:var(--mono)">${log.ip || '-'}</td>
+                      <td><span class="badge ${log.success ? 'green' : 'red'}" style="--green-bg:var(--green-bg);--green:var(--green);--red-bg:var(--red-bg);--red:var(--red)">${log.success ? '✅ 成功' : '❌ 失败'}</span></td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderToasts() {
+      let c = document.querySelector('.toast-container');
+      if (!c) { c = document.createElement('div'); c.className = 'toast-container'; document.body.appendChild(c); }
+      c.innerHTML = state.toasts.map(t => `<div class="toast ${t.type}">${t.message}</div>`).join('');
+      setTimeout(() => { state.toasts = []; c.innerHTML = ''; }, 3000);
+    }
+
+    // ============================================
+    // Animations
+    // ============================================
+    function initAnim() {
+      document.addEventListener('mousemove', e => {
+        const stage = document.getElementById('stage');
+        if (!stage) return;
+        const rect = stage.getBoundingClientRect();
+        state.anim.targetMouseX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+        state.anim.targetMouseY = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+      });
+      animate();
+      blinkLoop('purple');
+      blinkLoop('black');
+    }
+
+    function animate() {
+      state.anim.mouseX += (state.anim.targetMouseX - state.anim.mouseX) * 0.12;
+      state.anim.mouseY += (state.anim.targetMouseY - state.anim.mouseY) * 0.12;
+      updateChars();
+      requestAnimationFrame(animate);
+    }
+
+    function updateChars() {
+      const ox = state.anim.mouseX / 20;
+      const oy = state.anim.mouseY / 28;
+      const skew = -state.anim.mouseX / 120;
+      const ph = document.getElementById('purpleChar');
+      const pe = document.getElementById('purpleEyes');
+      const bh = document.getElementById('blackChar');
+      const be = document.getElementById('blackEyes');
+      const oe = document.getElementById('orangeEyes');
+      const ye = document.getElementById('yellowEyes');
+      const ym = document.getElementById('ym');
+      const pwdHide = state.anim.activeField === 'password' && document.getElementById('passwordInput')?.value && !state.anim.showPassword;
+
+      if (ph && pe) {
+        ph.style.transform = pwdHide ? 'skewX(-10deg) translateX(34px)' : state.anim.isTyping ? `skewX(${skew - 10}deg) translateX(26px)` : `skewX(${skew}deg)`;
+        pe.style.left = (pwdHide ? 28 : 40 + ox) + 'px';
+        pe.style.top = (pwdHide ? 40 : 38 + oy) + 'px';
+        ['pp1', 'pp2'].forEach(id => { const e = document.getElementById(id); if (e) e.style.transform = `translate(${pwdHide ? 3 : ox}px, ${pwdHide ? 4 : oy}px)`; });
+      }
+      if (bh && be) {
+        bh.style.transform = pwdHide ? 'skewX(8deg) translateX(10px)' : state.anim.lookingAtEachOther ? `skewX(${skew + 8}deg)` : `skewX(${skew}deg)`;
+        be.style.left = (22 + ox) + 'px';
+        be.style.top = (28 + oy) + 'px';
+        ['bp1', 'bp2'].forEach(id => { const e = document.getElementById(id); if (e) e.style.transform = `translate(${ox}px, ${oy}px)`; });
+      }
+      if (oe) { oe.style.left = (pwdHide ? 62 : 72 + ox) + 'px'; oe.style.top = (78 + oy) + 'px'; ['op1','op2'].forEach(id => { const e = document.getElementById(id); if (e) e.style.transform = `translate(${ox}px,${oy}px)`; }); }
+      if (ye && ym) {
+        ye.style.left = (pwdHide ? 14 : 46 + ox) + 'px';
+        ye.style.top = (pwdHide ? 38 : 38 + oy) + 'px';
+        ym.style.left = (pwdHide ? 14 : 36 + ox) + 'px';
+        ym.style.top = (pwdHide ? 92 : 78 + oy) + 'px';
+        ['yp1','yp2'].forEach(id => { const e = document.getElementById(id); if (e) e.style.transform = `translate(${ox}px,${oy}px)`; });
+      }
+    }
+
+    function blinkLoop(type) {
+      const el = document.getElementById(`${type === 'purple' ? 'pb1' : 'bb1'}`);
+      if (!el) return;
+      el.classList.add('blinking');
+      setTimeout(() => el.classList.remove('blinking'), 160);
+      setTimeout(() => blinkLoop(type), Math.random() * 4000 + 3000);
+    }
+
+    function startTyping(f) { state.anim.activeField = f; state.anim.isTyping = true; state.anim.lookingAtEachOther = true; setTimeout(() => { state.anim.lookingAtEachOther = false; }, 800); }
+    function stopTyping(f) { if (!f || state.anim.activeField === f) state.anim.activeField = ''; state.anim.isTyping = false; }
+    function togglePassword() {
+      state.anim.showPassword = !state.anim.showPassword;
+      const inp = document.getElementById('passwordInput');
+      const ic = document.getElementById('eyeIcon');
+      if (inp) inp.type = state.anim.showPassword ? 'text' : 'password';
+      if (ic) ic.innerHTML = state.anim.showPassword ? '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>' : '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+    }
+
+    // ============================================
+    // Event Handlers
+    // ============================================
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('emailInput')?.value;
+      const password = document.getElementById('passwordInput')?.value;
+      const btn = document.getElementById('submitBtn');
+      if (!email || !password) { showToast('请填写完整信息', 'error'); return; }
+      btn.textContent = '登录中...'; btn.disabled = true;
+      try {
+        await login(email, password);
+        const user = getCurrentUser();
+        state.user = user;
+        showToast('登录成功！', 'success');
+        setTimeout(async () => {
+          state.projects = await getProjects();
+          state.page = 'dashboard';
+          render();
+        }, 500);
+      } catch (err) {
+        showToast(err.message, 'error');
+        btn.textContent = '登录';
+        btn.disabled = false;
+      }
+    }
+
+    function handleLogout() { logout(); }
+
+    function toggleDropdown() { state.dropdownOpen = !state.dropdownOpen; render(); }
+
+    function showToast(msg, type = 'success') { state.toasts.push({ message: msg, type }); render(); }
+
+    async function navigate(page) {
+      state.dropdownOpen = false;
+      state.page = page;
+      if (page === 'users') state.users = await getUsers();
+      if (page === 'logs') { const d = await getLogs(); state.logs = d.logs || []; }
+      render();
+    }
+
+    function filterUsers(q) {
+      q = q.toLowerCase();
+      document.querySelectorAll('#usersTableBody tr').forEach(row => {
+        row.style.display = row.dataset.email.includes(q) ? '' : 'none';
+      });
+    }
+
+    async function editUser(id) {
+      const u = state.users.find(x => x.id === id);
+      if (!u) return;
+      const name = prompt('姓名:', u.name);
+      if (name === null) return;
+      const role = prompt('角色 (admin/user):', u.role);
+      if (role === null) return;
+      await updateUser(id, { name, role: role === 'admin' ? 'admin' : 'user' });
+      state.users = await getUsers();
+      showToast('更新成功', 'success');
+      render();
+    }
+
+    async function resetUserPassword(id) {
+      const pwd = prompt('新密码:');
+      if (!pwd) return;
+      await resetPassword(id, pwd);
+      showToast('密码已重置', 'success');
+    }
+
+    async function deleteUser(id) {
+      if (!confirm('确定删除此用户？')) return;
+      await deleteUser(id);
+      state.users = await getUsers();
+      showToast('用户已删除', 'success');
+      render();
+    }
+
+    async function showAddUserModal() {
+      const email = prompt('邮箱:');
+      if (!email) return;
+      const pwd = prompt('初始密码:');
+      if (!pwd) return;
+      const name = prompt('姓名:');
+      if (!name) return;
+      const role = prompt('角色 (admin/user):', 'user');
+      if (!role) return;
+      await createUser(email, pwd, name, role === 'admin' ? 'admin' : 'user');
+      state.users = await getUsers();
+      showToast('用户创建成功', 'success');
+      render();
+    }
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.dropdown') && state.dropdownOpen) { state.dropdownOpen = false; render(); }
+    });
+
+    // Init
+    state.projects = getCurrentUser() ? [] : state.projects;
+    render();
+  </script>
+</body>
+</html>

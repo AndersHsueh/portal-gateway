@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Database
+*.db
+*.db-journal
+
+# Logs
+*.log
+
+# Mac
+.DS_Store
+
+# Backend files on remote
+# (frontend/index.html is the static deployed file)
+# Backend is deployed separately via SCP
