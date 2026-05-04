@@ -78,6 +78,9 @@ def get_all_running_services() -> List[dict]:
             if len(parts) >= 4:
                 addr = parts[3]  # e.g. 0.0.0.0:17573
                 if ":" in addr:
+                    # 跳过 localhost only 的端口（如 127.0.0.1:54329 是 postgres）
+                    if addr.startswith("127.0.0.1:") or addr.startswith("[::1]:"):
+                        continue
                     port_str = addr.rsplit(":", 1)[1]
                     try:
                         port = int(port_str)

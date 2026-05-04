@@ -36,6 +36,13 @@
       "url": "http://101.201.32.200:7011"
     },
     {
+      "id": 7,
+      "name": "Open-Design",
+      "description": "开源版仿Claude-Design功能，支持设计稿预览和标注",
+      "icon": "🎨",
+      "url": "http://101.201.32.200:17573"
+    },
+    {
       "id": 6,
       "name": "Vibe-Trading",
       "description": "量化交易回测系统，支持策略开发和绩效分析",
