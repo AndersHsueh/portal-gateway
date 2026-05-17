@@ -28,6 +28,9 @@ ENV/
 # Mac
 .DS_Store
 
+# Docker
+docker-compose.override.yml
+
 # Backend files on remote
 # (frontend/index.html is the static deployed file)
 # Backend is deployed separately via SCP

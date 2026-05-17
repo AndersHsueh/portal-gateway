@@ -271,6 +271,30 @@
     .register-row a:hover { text-decoration: underline; }
     .login-footer { position: fixed; left: 0; right: 0; bottom: 16px; text-align: center; color: var(--text-faint); font-size: 11px; letter-spacing: 0.02em; }
 
+    /* Mode switch links */
+    .mode-links { margin-top: 20px; text-align: center; font-size: 13px; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px; }
+    .mode-links a { color: var(--accent); text-decoration: none; font-weight: 500; cursor: pointer; }
+    .mode-links a:hover { text-decoration: underline; }
+
+    /* Send code button */
+    .send-code-btn {
+      width: 100%; height: 48px; border: 1px solid var(--accent); border-radius: var(--radius);
+      font-size: 15px; font-weight: 600; font-family: inherit;
+      background: var(--accent-tint); color: var(--accent); cursor: pointer;
+      transition: transform 120ms ease, background 120ms ease; margin-top: 8px;
+    }
+    .send-code-btn:hover:not(:disabled) { background: var(--accent-soft); }
+    .send-code-btn:active:not(:disabled) { transform: scale(0.98); }
+    .send-code-btn:disabled { opacity: 0.5; cursor: not-allowed; border-color: var(--border); background: var(--bg-subtle); color: var(--text-muted); }
+
+    /* Code input styling */
+    .input.code-input { text-transform: uppercase; letter-spacing: 6px; font-weight: 600; font-family: var(--mono); font-size: 18px; text-align: center; padding-left: 14px; }
+    .input[readonly] { background: var(--bg-subtle); color: var(--text-muted); cursor: default; }
+
+    /* Form switch animation */
+    .form-wrap { animation: fadeSlideIn 250ms ease-out; }
+    @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
     /* Toast */
     .toast-container { position: fixed; top: 24px; right: 24px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
     .toast { padding: 12px 16px; border-radius: var(--radius); font-size: 13px; box-shadow: var(--shadow-md); animation: pop-in 180ms ease-out; }
@@ -448,6 +472,45 @@
       return res.json();
     }
 
+    async function sendCode(email, type) {
+      const res = await fetch(`${API_BASE}/auth/send-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, type })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || '发送失败');
+      }
+      return res.json();
+    }
+
+    async function registerUser(email, code, password, name) {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code, password, name: name || undefined })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || '注册失败');
+      }
+      return res.json();
+    }
+
+    async function resetPasswordWithCode(email, code, newPassword) {
+      const res = await fetch(`${API_BASE}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code, new_password: newPassword })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || '重置失败');
+      }
+      return res.json();
+    }
+
     // ============================================
     // State
     // ============================================
@@ -460,7 +523,12 @@
       dropdownOpen: false,
       anim: { mouseX: 275, mouseY: 150, targetMouseX: 275, targetMouseY: 150, isTyping: false, activeField: '', showPassword: false, lookingAtEachOther: false },
       toasts: [],
-      loading: false
+      loading: false,
+      loginMode: 'login',
+      codeCooldown: 0,
+      registerStep: 1,
+      forgotStep: 1,
+      cooldownTimer: null
     };
 
     // Check if already logged in — validate token with backend first
@@ -556,34 +624,157 @@
             </section>
             <section class="form-panel">
               <div class="form-wrap">
-                <div class="form-header">
-                  <h2>登录系统</h2>
-                  <p>使用邮箱和密码登录</p>
-                </div>
-                <form class="login-form" onsubmit="handleLogin(event)">
-                  <div class="input-group">
-                    <div class="input-wrapper">
-                      <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                      <input type="email" class="input" id="emailInput" placeholder="邮箱地址" required onfocus="startTyping('username')" onblur="stopTyping('username')">
-                    </div>
-                  </div>
-                  <div class="input-group">
-                    <div class="input-wrapper">
-                      <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                      <input type="password" class="input" id="passwordInput" placeholder="密码" required onfocus="startTyping('password')" onblur="stopTyping('password')">
-                      <button type="button" class="password-toggle" onclick="togglePassword()">
-                        <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                      </button>
-                    </div>
-                  </div>
-                  <button type="submit" class="submit-btn" id="submitBtn">登录</button>
-                  <div class="register-row">还没有账号？ <a href="#" onclick="showToast('请联系管理员创建账号', 'error'); return false;">联系管理员</a></div>
-                </form>
+                ${state.loginMode === 'login' ? renderLoginForm() : ''}
+                ${state.loginMode === 'register' ? renderRegisterForm() : ''}
+                ${state.loginMode === 'forgot' ? renderForgotForm() : ''}
               </div>
             </section>
           </div>
           <div class="login-footer">老薛的技术博客 · Anders' TechBlog · © 2026 · <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">粤ICP备2026057105号-1</a></div>
         </div>
+      `;
+    }
+
+    function renderLoginForm() {
+      return `
+        <div class="form-header">
+          <h2 style="color:var(--text-strong)">Login | 开始</h2>
+          <p>使用邮箱和密码登录</p>
+        </div>
+        <form class="login-form" onsubmit="handleLogin(event)">
+          <div class="input-group">
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              <input type="email" class="input" id="emailInput" placeholder="邮箱地址" required onfocus="startTyping('username')" onblur="stopTyping('username')">
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <input type="password" class="input" id="passwordInput" placeholder="密码" required onfocus="startTyping('password')" onblur="stopTyping('password')">
+              <button type="button" class="password-toggle" onclick="togglePassword()">
+                <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="submit-btn" id="submitBtn">登录</button>
+          <div class="mode-links">
+            <div>还没有账号？ <a onclick="switchLoginMode('register')">注册账号</a></div>
+            <div><a onclick="switchLoginMode('forgot')">忘记密码？</a></div>
+          </div>
+        </form>
+      `;
+    }
+
+    function renderRegisterForm() {
+      if (state.registerStep === 1) {
+        return `
+          <div class="form-header">
+            <h2>注册账号</h2>
+            <p>输入邮箱开始注册</p>
+          </div>
+          <form class="login-form" onsubmit="handleSendCode('register'); return false;">
+            <div class="input-group">
+              <div class="input-wrapper">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                <input type="email" class="input" id="regEmailInput" placeholder="邮箱地址" required onfocus="startTyping('username')" onblur="stopTyping('username')">
+              </div>
+            </div>
+            <button type="submit" class="send-code-btn" id="sendCodeBtn">发送验证码</button>
+            <div class="mode-links">
+              <div>已有账号？ <a onclick="switchLoginMode('login')">登录</a></div>
+            </div>
+          </form>
+        `;
+      }
+      return `
+        <div class="form-header">
+          <h2>注册账号</h2>
+          <p>验证邮箱并设置密码</p>
+        </div>
+        <form class="login-form" onsubmit="handleRegister(event)">
+          <div class="input-group">
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              <input type="email" class="input" id="regEmailInput" readonly onfocus="startTyping('username')" onblur="stopTyping('username')">
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M7 12h10"/><path d="M7 17h10"/></svg>
+              <input type="text" class="input code-input" id="regCodeInput" placeholder="验证码" maxlength="4" required onfocus="startTyping('username')" onblur="stopTyping('username')">
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <input type="password" class="input" id="regPasswordInput" placeholder="设置密码（至少6位）" required onfocus="startTyping('password')" onblur="stopTyping('password')">
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <input type="text" class="input" id="regNameInput" placeholder="姓名（可选）" onfocus="startTyping('username')" onblur="stopTyping('username')">
+            </div>
+          </div>
+          <button type="submit" class="submit-btn">注册</button>
+          <div class="mode-links">
+            <div>已有账号？ <a onclick="switchLoginMode('login')">登录</a></div>
+          </div>
+        </form>
+      `;
+    }
+
+    function renderForgotForm() {
+      if (state.forgotStep === 1) {
+        return `
+          <div class="form-header">
+            <h2>重置密码</h2>
+            <p>输入注册邮箱</p>
+          </div>
+          <form class="login-form" onsubmit="handleSendCode('reset'); return false;">
+            <div class="input-group">
+              <div class="input-wrapper">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                <input type="email" class="input" id="forgotEmailInput" placeholder="邮箱地址" required onfocus="startTyping('username')" onblur="stopTyping('username')">
+              </div>
+            </div>
+            <button type="submit" class="send-code-btn" id="sendCodeBtn">发送验证码</button>
+            <div class="mode-links">
+              <div><a onclick="switchLoginMode('login')">返回登录</a></div>
+            </div>
+          </form>
+        `;
+      }
+      return `
+        <div class="form-header">
+          <h2>重置密码</h2>
+          <p>输入验证码并设置新密码</p>
+        </div>
+        <form class="login-form" onsubmit="handleResetPassword(event)">
+          <div class="input-group">
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              <input type="email" class="input" id="forgotEmailInput" readonly onfocus="startTyping('username')" onblur="stopTyping('username')">
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M7 12h10"/><path d="M7 17h10"/></svg>
+              <input type="text" class="input code-input" id="forgotCodeInput" placeholder="验证码" maxlength="4" required onfocus="startTyping('username')" onblur="stopTyping('username')">
+            </div>
+          </div>
+          <div class="input-group">
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <input type="password" class="input" id="forgotNewPasswordInput" placeholder="新密码（至少6位）" required onfocus="startTyping('password')" onblur="stopTyping('password')">
+            </div>
+          </div>
+          <button type="submit" class="submit-btn">重置密码</button>
+          <div class="mode-links">
+            <div><a onclick="switchLoginMode('login')">返回登录</a></div>
+          </div>
+        </form>
       `;
     }
 
@@ -846,6 +1037,84 @@
     }
 
     function handleLogout() { logout(); }
+
+    function switchLoginMode(mode) {
+      if (state.cooldownTimer) { clearInterval(state.cooldownTimer); state.cooldownTimer = null; }
+      state.loginMode = mode;
+      state.codeCooldown = 0;
+      state.registerStep = 1;
+      state.forgotStep = 1;
+      render();
+    }
+
+    async function handleSendCode(type) {
+      const emailInputId = type === 'register' ? 'regEmailInput' : 'forgotEmailInput';
+      const email = document.getElementById(emailInputId)?.value;
+      if (!email) { showToast('请输入邮箱', 'error'); return; }
+
+      const btn = document.getElementById('sendCodeBtn');
+      btn.textContent = '发送中...'; btn.disabled = true;
+
+      try {
+        await sendCode(email, type);
+        state.codeCooldown = 120;
+
+        if (type === 'register') { state.registerStep = 2; }
+        else { state.forgotStep = 2; }
+
+        showToast('验证码已发送', 'success');
+        render();
+
+        // Start countdown after render
+        state.cooldownTimer = setInterval(() => {
+          state.codeCooldown--;
+          const b = document.getElementById('sendCodeBtn');
+          if (b) b.textContent = state.codeCooldown > 0 ? `${state.codeCooldown}s 后重新发送` : '发送验证码';
+          if (b && state.codeCooldown <= 0) b.disabled = false;
+          if (state.codeCooldown <= 0) { clearInterval(state.cooldownTimer); state.cooldownTimer = null; }
+        }, 1000);
+      } catch (err) {
+        showToast(err.message, 'error');
+        btn.textContent = '发送验证码'; btn.disabled = false;
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const email = document.getElementById('regEmailInput')?.value;
+      const code = document.getElementById('regCodeInput')?.value;
+      const password = document.getElementById('regPasswordInput')?.value;
+      const name = document.getElementById('regNameInput')?.value;
+
+      if (!email || !code || !password) { showToast('请填写完整信息', 'error'); return; }
+      if (password.length < 6) { showToast('密码至少6位', 'error'); return; }
+
+      try {
+        await registerUser(email, code.toUpperCase(), password, name);
+        showToast('注册成功，请登录', 'success');
+        switchLoginMode('login');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function handleResetPassword(e) {
+      e.preventDefault();
+      const email = document.getElementById('forgotEmailInput')?.value;
+      const code = document.getElementById('forgotCodeInput')?.value;
+      const newPassword = document.getElementById('forgotNewPasswordInput')?.value;
+
+      if (!email || !code || !newPassword) { showToast('请填写完整信息', 'error'); return; }
+      if (newPassword.length < 6) { showToast('密码至少6位', 'error'); return; }
+
+      try {
+        await resetPasswordWithCode(email, code.toUpperCase(), newPassword);
+        showToast('密码重置成功，请登录', 'success');
+        switchLoginMode('login');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
 
     function toggleDropdown() { state.dropdownOpen = !state.dropdownOpen; render(); }
 

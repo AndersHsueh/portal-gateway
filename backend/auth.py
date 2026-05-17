@@ -1,19 +1,47 @@
+import random
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Form, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_DAYS
 from database import get_db
-from models import User, LoginLog
+from email_service import send_verification_code
+from models import User, LoginLog, VerifyCode
 
 router = APIRouter(prefix="/api/auth", tags=["认证"])
 security = HTTPBearer()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# 排除易混淆字符 I/O/1/0
+CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+
+class SendCodeRequest(BaseModel):
+    email: str
+    type: Literal["register", "reset"]
+
+
+class RegisterRequest(BaseModel):
+    email: str
+    code: str
+    password: str
+    name: Optional[str] = None
+
+
+class ResetPasswordBody(BaseModel):
+    email: str
+    code: str
+    new_password: str
+
+
+def generate_code(length: int = 4) -> str:
+    return "".join(random.choices(CODE_CHARS, k=length))
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -109,3 +137,101 @@ def get_me(current_user: User = Depends(get_current_user)):
         "name": current_user.name,
         "role": current_user.role
     }
+
+
+@router.post("/send-code")
+async def send_code(body: SendCodeRequest, db: Session = Depends(get_db)):
+    existing_user = db.query(User).filter(User.email == body.email, User.is_deleted == False).first()
+
+    if body.type == "register" and existing_user:
+        raise HTTPException(status_code=400, detail="该邮箱已注册")
+    if body.type == "reset" and not existing_user:
+        raise HTTPException(status_code=400, detail="该邮箱未注册")
+
+    # 2 分钟频率限制
+    recent = db.query(VerifyCode).filter(
+        VerifyCode.email == body.email,
+        VerifyCode.type == body.type,
+        VerifyCode.created_at > datetime.utcnow() - timedelta(minutes=2)
+    ).first()
+    if recent:
+        raise HTTPException(status_code=429, detail="发送过于频繁，请2分钟后再试")
+
+    code = generate_code()
+    verify_code = VerifyCode(
+        email=body.email,
+        code=code,
+        type=body.type,
+        expires_at=datetime.utcnow() + timedelta(minutes=10)
+    )
+    db.add(verify_code)
+    db.commit()
+
+    success = await send_verification_code(body.email, code, body.type)
+    if not success:
+        raise HTTPException(status_code=500, detail="邮件发送失败，请稍后重试")
+
+    return {"message": "验证码已发送", "expires_in": 600}
+
+
+@router.post("/register")
+def register(body: RegisterRequest, db: Session = Depends(get_db)):
+    if db.query(User).filter(User.email == body.email, User.is_deleted == False).first():
+        raise HTTPException(status_code=400, detail="该邮箱已注册")
+
+    if len(body.password) < 6:
+        raise HTTPException(status_code=400, detail="密码至少6位")
+
+    vc = db.query(VerifyCode).filter(
+        VerifyCode.email == body.email,
+        VerifyCode.code == body.code.upper(),
+        VerifyCode.type == "register",
+        VerifyCode.used == False,
+        VerifyCode.expires_at > datetime.utcnow()
+    ).first()
+    if not vc:
+        raise HTTPException(status_code=400, detail="验证码错误或已过期")
+
+    vc.used = True
+
+    name = body.name or body.email.split("@")[0]
+    user = User(
+        email=body.email,
+        password_hash=get_password_hash(body.password),
+        name=name,
+        role="user"
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "message": "注册成功",
+        "user": {"id": user.id, "email": user.email, "name": user.name}
+    }
+
+
+@router.post("/reset-password")
+def reset_password_with_code(body: ResetPasswordBody, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == body.email, User.is_deleted == False).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="该邮箱未注册")
+
+    if len(body.new_password) < 6:
+        raise HTTPException(status_code=400, detail="密码至少6位")
+
+    vc = db.query(VerifyCode).filter(
+        VerifyCode.email == body.email,
+        VerifyCode.code == body.code.upper(),
+        VerifyCode.type == "reset",
+        VerifyCode.used == False,
+        VerifyCode.expires_at > datetime.utcnow()
+    ).first()
+    if not vc:
+        raise HTTPException(status_code=400, detail="验证码错误或已过期")
+
+    vc.used = True
+    user.password_hash = get_password_hash(body.new_password)
+    db.commit()
+
+    return {"message": "密码重置成功"}

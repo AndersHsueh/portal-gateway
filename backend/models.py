@@ -33,3 +33,15 @@ class LoginLog(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="login_logs")
+
+
+class VerifyCode(Base):
+    __tablename__ = "verify_codes"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    email = Column(String(255), index=True, nullable=False)
+    code = Column(String(4), nullable=False)
+    type = Column(String(10), nullable=False)  # "register" or "reset"
+    used = Column(Boolean, default=False)
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)

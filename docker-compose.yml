@@ -1,0 +1,18 @@
+services:
+  backend:
+    build: ./backend
+    environment:
+      - DATABASE_URL=sqlite:////data/portal.db
+      - PROJECT_LIST_PATH=/data/project-list.json
+      - SMTP_PASSWORD=FJ53Bf5ecUdxbFcZ
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
