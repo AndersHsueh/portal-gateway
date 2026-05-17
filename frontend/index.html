@@ -463,13 +463,28 @@
       loading: false
     };
 
-    // Check if already logged in
+    // Check if already logged in — validate token with backend first
     const savedUser = getCurrentUser();
-    if (savedUser) {
+    const savedToken = localStorage.getItem('token');
+    if (savedUser && savedToken) {
       state.user = savedUser;
       state.page = 'dashboard';
-      // Fetch projects for returning logged-in user
-      getProjects().then(p => { state.projects = p; render(); });
+      render(); // show dashboard immediately
+      // Validate token in background; if expired, redirect to login
+      fetchWithAuth(`${API_BASE}/auth/me`).then(res => {
+        if (res.ok) {
+          return getProjects().then(p => { state.projects = p; render(); });
+        } else {
+          // Token invalid — clear and go to login
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          state.user = null;
+          state.page = 'login';
+          render();
+        }
+      }).catch(() => {
+        // Network error — keep showing dashboard with cached data
+      });
     }
 
     const icons = {
@@ -567,7 +582,7 @@
               </div>
             </section>
           </div>
-          <div class="login-footer">老薛的技术博客 · Anders' TechBlog · © 2026</div>
+          <div class="login-footer">老薛的技术博客 · Anders' TechBlog · © 2026 · <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">粤ICP备2026057105号-1</a></div>
         </div>
       `;
     }
