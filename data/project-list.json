@@ -48,6 +48,14 @@
       "description": "量化交易回测系统，支持策略开发和绩效分析",
       "icon": "📈",
       "url": "http://101.201.32.200:8899"
+    },
+    {
+      "id": 8,
+      "name": "K8s Dashboard",
+      "description": "Kubernetes 集群管理控制台，查看集群资源和工作负载状态",
+      "icon": "☸️",
+      "url": "https://k8s.aliceintelligence.work/",
+      "role": "admin"
     }
   ]
 }

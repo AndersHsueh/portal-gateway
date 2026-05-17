@@ -18,3 +18,7 @@ SMTP_PORT = 465
 SMTP_USER = "a_ni_xue@126.com"
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "FJ53Bf5ecUdxbFcZ")
 SMTP_FROM = f"老薛的技术博客 <{SMTP_USER}>"
+
+# K8s Dashboard 认证配置
+K8S_DASHBOARD_TOKEN = os.environ.get("K8S_DASHBOARD_TOKEN", "")
+COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", ".aliceintelligence.work")

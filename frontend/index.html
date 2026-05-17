@@ -400,9 +400,14 @@
     }
 
     function logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.reload();
+      fetch(`${API_BASE}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      }).finally(() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.reload();
+      });
     }
 
     function getCurrentUser() {

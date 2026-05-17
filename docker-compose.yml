@@ -5,6 +5,8 @@ services:
       - DATABASE_URL=sqlite:////data/portal.db
       - PROJECT_LIST_PATH=/data/project-list.json
       - SMTP_PASSWORD=FJ53Bf5ecUdxbFcZ
+      - K8S_DASHBOARD_TOKEN=${K8S_DASHBOARD_TOKEN:-}
+      - COOKIE_DOMAIN=${COOKIE_DOMAIN:-.aliceintelligence.work}
     volumes:
       - ./data:/data
     restart: unless-stopped

@@ -2,14 +2,14 @@ import random
 from datetime import datetime, timedelta
 from typing import Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Form, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_DAYS
+from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_DAYS, COOKIE_DOMAIN, K8S_DASHBOARD_TOKEN
 from database import get_db
 from email_service import send_verification_code
 from models import User, LoginLog, VerifyCode
@@ -90,7 +90,7 @@ def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
 
 
 @router.post("/login")
-def login(request: Request, email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+def login(request: Request, response: Response, email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == email, User.is_deleted == False).first()
 
     # 记录登录日志
@@ -108,6 +108,18 @@ def login(request: Request, email: str = Form(...), password: str = Form(...), d
         db.commit()
 
         access_token = create_access_token(data={"sub": user.email, "role": user.role})
+
+        # 设置跨子域 cookie，用于 K8s Dashboard 等子服务认证
+        response.set_cookie(
+            key="portal_token",
+            value=access_token,
+            domain=COOKIE_DOMAIN,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+            max_age=ACCESS_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+        )
+
         return {
             "access_token": access_token,
             "token_type": "bearer",
@@ -125,8 +137,43 @@ def login(request: Request, email: str = Form(...), password: str = Form(...), d
 
 
 @router.post("/logout")
-def logout(current_user: User = Depends(get_current_user)):
+def logout(response: Response, current_user: User = Depends(get_current_user)):
+    response.delete_cookie("portal_token", domain=COOKIE_DOMAIN)
     return {"message": "已退出登录"}
+
+
+@router.get("/k8s-check")
+def k8s_auth_check(request: Request, db: Session = Depends(get_db)):
+    """
+    供 ingress-nginx auth-url 调用的认证端点。
+    从 cookie 中读取 portal_token，校验 JWT 和 admin 角色，
+    成功则返回 200 并在 Authorization 头中携带 k8s ServiceAccount token。
+    """
+    token = request.cookies.get("portal_token")
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="未登录")
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="无效的认证凭据")
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="认证已过期")
+
+    user = db.query(User).filter(User.email == email, User.is_deleted == False).first()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="用户不存在")
+
+    if user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="需要管理员权限")
+
+    if not K8S_DASHBOARD_TOKEN:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="K8s Dashboard Token 未配置")
+
+    response = Response(status_code=200)
+    response.headers["Authorization"] = f"Bearer {K8S_DASHBOARD_TOKEN}"
+    return response
 
 
 @router.get("/me")

@@ -144,4 +144,8 @@ def get_projects(db: Session = Depends(get_db), current_user: User = Depends(get
     if not all_projects:
         all_projects = discovered
 
+    # 5. 非管理员过滤掉 role 为 "admin" 的项目
+    if current_user.role != "admin":
+        all_projects = [p for p in all_projects if p.get("role", "user") != "admin"]
+
     return {"projects": all_projects}
