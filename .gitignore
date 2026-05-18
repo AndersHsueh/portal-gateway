@@ -31,6 +31,9 @@ ENV/
 # Docker
 docker-compose.override.yml
 
+# Docker build cache
+.docker/
+
 # Backend files on remote
 # (frontend/index.html is the static deployed file)
 # Backend is deployed separately via SCP
